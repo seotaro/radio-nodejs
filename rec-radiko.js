@@ -20,7 +20,7 @@ const FILENAME = process.argv[4];
     await utils.authorization2(token, partialKey);
 
     const url = await utils.getStreamUrl(CHANNEL);
-    await utils.download(token, url, DURATION, FILENAME);
+    await utils.downloadFromRadiko(token, url, DURATION, FILENAME);
 
   } catch (err) {
     console.error(err);

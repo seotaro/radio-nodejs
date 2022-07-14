@@ -100,7 +100,7 @@ const toPartialKey = (key, offset, length) => {
   return Buffer.from(partialKey).toString('base64');
 }
 
-const download = (authToken, url, duration, filename) => {
+const downloadFromRadiko = (authToken, url, duration, filename) => {
   const command = [
     `ffmpeg`,
     `-loglevel error`,
@@ -108,6 +108,30 @@ const download = (authToken, url, duration, filename) => {
     `-fflags +discardcorrupt`,
     `-headers "X-Radiko-Authtoken: ${authToken}"`,
     `-y -i ${url}`,
+    `-bsf:a aac_adtstoasc`,
+    `-c copy "${filename}.m4a"`
+  ];
+
+  return new Promise((resolve, reject) => {
+    exec(command.join(' '), (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      } else {
+        console.log(now(), 'downloaded', filename);
+        resolve();
+      }
+    });
+  })
+}
+
+const downloadFromNhkOnDemand = (url, duration, filename) => {
+  const command = [
+    `ffmpeg`,
+    `-loglevel error`,
+    `-t ${duration}`,
+    `-fflags +discardcorrupt`,
+    `-y -i ${url}`,
+    `-bsf:a aac_adtstoasc`,
     `-c copy "${filename}.m4a"`
   ];
 
@@ -130,5 +154,6 @@ module.exports = {
   authorization2,
   getStreamUrl,
   toPartialKey,
-  download,
+  downloadFromRadiko,
+  downloadFromNhkOnDemand,
 };
