@@ -20,4 +20,5 @@ WORKDIR /workspace
 COPY package*.json ./
 RUN yarn install
 COPY rec-radiko.js ./
+COPY rec-nhk-on-demand.js ./
 COPY utils.js ./
