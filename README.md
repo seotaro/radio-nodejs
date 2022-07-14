@@ -1,4 +1,4 @@
-# radio-node
+# ラジオストリーミングの保存 （node.js 版）
 
 ## らじる★らじる（NHK on Demand）
 
