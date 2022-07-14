@@ -1,5 +1,15 @@
 # radio-node
 
+## らじる★らじる（NHK on Demand）
+
+```bash
+node rec-nhk-on-demand.js {r1|r2|r3} duration filename
+```
+
+- r1: NHKラジオ第1
+- r2: NHKラジオ第2
+- r3: NHKFM
+
 ## radiko
 
 ```bash
