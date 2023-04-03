@@ -18,66 +18,54 @@ const format = (date) => {
 // AuthToken と PartialKey を返す。
 const authorization1 = () => {
   const AUTHKEY = 'bcd151073c03b352e1ef2fd66c32209da9ca0afa';
-  const URL = `https://radiko.jp/v2/api/auth1_fms`;
-
-  const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-  });
+  const URL = `https://radiko.jp/v2/api/auth1`;
 
   return fetch(URL, {
-    method: 'POST',
+    method: 'GET',
     headers: {
-      'pragma': 'no-cache',
       'X-Radiko-App': 'pc_html5',
       'X-Radiko-App-Version': '0.0.1',
-      'X-Radiko-User': 'test-stream',
+      'X-Radiko-User': 'dummy_user',
       'X-Radiko-Device': 'pc',
     },
-    agent: httpsAgent,
-    body: '',
   })
     .then(response => {
-      return response.text();
+      if (response.status !== 200) throw new Error(`status=${response.status}`);
+      if (!response.headers.has('x-radiko-authtoken')
+        || !response.headers.has('x-radiko-keyoffset')
+        || !response.headers.has('x-radiko-keylength'))
+        throw new Error('header is missing');
+
+      const authtoken = response.headers.get('x-radiko-authtoken');
+      const partialKey = toPartialKey(AUTHKEY
+        , Number(response.headers.get('x-radiko-keyoffset'))
+        , Number(response.headers.get('x-radiko-keylength')));
+      return [authtoken, partialKey];
     })
-    .then(text => {
-      const headers = {};
-
-      const lines = text.split('\r\n');
-      lines.forEach(line => {
-        const [key, value] = line.split('=');
-        if (value) {
-          headers[key.toUpperCase()] = value;
-        }
-      });
-
-      const partialKey = toPartialKey(AUTHKEY, Number(headers['X-RADIKO-KEYOFFSET']), Number(headers['X-RADIKO-KEYLENGTH']));
-      return [headers['X-RADIKO-AUTHTOKEN'], partialKey];
+    .catch((err) => {
+      throw new Error(`authorization1 failed ${err}`);
     });
 };
 
 const authorization2 = (token, partialKey) => {
-  const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-  });
-
-  const URL = `https://radiko.jp/v2/api/auth2_fms`;
+  const URL = `https://radiko.jp/v2/api/auth2`;
   return fetch(URL, {
-    method: 'POST',
+    method: 'GET',
     headers: {
-      'pragma': 'no-cache',
       'X-Radiko-User': 'dummy-user',
       'X-Radiko-Device': 'pc',
       'X-Radiko-AuthToken': token,
       'X-Radiko-PartialKey': partialKey,
     },
-    agent: httpsAgent,
-    body: '',
   })
     .then(response => {
-      if (response.status !== 200) {
-        throw new Error('authorization2 failed');
-      }
+      if (response.status !== 200) throw new Error(`status=${response.status}`);
+
+
     })
+    .catch((err) => {
+      throw new Error(`authorization2 failed ${err}`);
+    });
 }
 
 
