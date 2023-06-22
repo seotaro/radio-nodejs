@@ -19,7 +19,8 @@ const FILENAME = process.argv[4];
     const [token, partialKey] = await utils.authorization1();
     await utils.authorization2(token, partialKey);
 
-    const url = await utils.getStreamUrl(CHANNEL);
+    // https://radiko.jp/v3/station/stream/pc_html5/${CHANNEL}.xml の定義から
+    const url = `http://f-radiko.smartstream.ne.jp/${CHANNEL}/_definst_/simul-stream.stream/playlist.m3u8`;
     await utils.downloadFromRadiko(token, url, DURATION, FILENAME);
 
   } catch (err) {
