@@ -89,16 +89,15 @@ const toPartialKey = (key, offset, length) => {
 }
 
 const downloadFromRadiko = (authToken, url, duration, filename) => {
-  const command = [
-    `ffmpeg`,
-    `-loglevel error`,
-    `-t ${duration}`,
-    `-fflags +discardcorrupt`,
-    `-headers "X-Radiko-Authtoken: ${authToken}"`,
-    `-y -i ${url}`,
-    `-bsf:a aac_adtstoasc`,
-    `-c copy "${filename}.m4a"`
-  ];
+  const command = [`ffmpeg`, `-loglevel error`];
+  if (duration) {
+    command.push(`-t ${duration}`)
+  }
+  command.push(`-fflags +discardcorrupt`);
+  command.push(`-headers "X-Radiko-Authtoken: ${authToken}"`);
+  command.push(`-y -i "${url}"`);
+  command.push(`-bsf:a aac_adtstoasc`);
+  command.push(`-c copy "${filename}.m4a"`);
 
   return new Promise((resolve, reject) => {
     exec(command.join(' '), (error, stdout, stderr) => {
