@@ -19,7 +19,10 @@ WORKDIR /workspace
 
 COPY package*.json ./
 RUN yarn install
+COPY index.js ./
 COPY rec-radiko.js ./
 COPY rec-nhk-on-demand.js ./
 COPY rec-radiko-time-free.js ./
 COPY utils.js ./
+
+CMD [ "node", "index.js" ]

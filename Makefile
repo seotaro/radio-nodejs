@@ -1,6 +1,7 @@
 PROJECT_ID := radiko-123456
 APP := radio-nodejs
 ZONE := asia-northeast1-b
+REGION := asia-northeast1
 
 
 build:
@@ -9,9 +10,12 @@ build:
 
 deploy:
 	gcloud builds submit . --tag asia.gcr.io/$(PROJECT_ID)/$(APP) --project $(PROJECT_ID) 
-	# gcloud compute instances delete $(APP) --quiet --delete-disks=all --zone $(ZONE) --project $(PROJECT_ID)
-	gcloud compute instances create-with-container $(APP) \
-		--zone $(ZONE) \
+	gcloud run deploy $(APP) \
 		--project $(PROJECT_ID) \
-		--container-image asia.gcr.io/$(PROJECT_ID)/$(APP) \
-		--machine-type e2-medium
+		--image asia.gcr.io/$(PROJECT_ID)/$(APP) \
+		--platform managed \
+		--region $(REGION) \
+		--memory 1Gi \
+		--concurrency 5 \
+		--max-instances 10 \
+		--allow-unauthenticated

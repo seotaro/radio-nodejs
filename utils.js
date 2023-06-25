@@ -6,6 +6,8 @@ const xml2js = require('xml2js');
 const { Buffer } = require('buffer');
 const { exec } = require('child_process');
 const moment = require('moment-timezone');
+const { Storage } = require("@google-cloud/storage");
+const storage = new Storage();
 
 const now = () => {
   return (new Date()).toISOString();
@@ -88,7 +90,7 @@ const toPartialKey = (key, offset, length) => {
   return Buffer.from(partialKey).toString('base64');
 }
 
-const downloadFromRadiko = (authToken, url, duration, filename) => {
+const downloadFromRadiko = (authToken, url, duration, dest) => {
   const command = [`ffmpeg`, `-loglevel error`];
   if (duration) {
     command.push(`-t ${duration}`)
@@ -97,14 +99,14 @@ const downloadFromRadiko = (authToken, url, duration, filename) => {
   command.push(`-headers "X-Radiko-Authtoken: ${authToken}"`);
   command.push(`-y -i "${url}"`);
   command.push(`-bsf:a aac_adtstoasc`);
-  command.push(`-c copy "${filename}.m4a"`);
+  command.push(`-c copy "${dest}"`);
 
   return new Promise((resolve, reject) => {
     exec(command.join(' '), (error, stdout, stderr) => {
       if (error) {
         reject(error);
       } else {
-        console.log(now(), 'downloaded', filename);
+        console.log(now(), 'downloaded', dest);
         resolve();
       }
     });
@@ -134,6 +136,15 @@ const downloadFromNhkOnDemand = (url, duration, filename) => {
   })
 }
 
+const upload = (key, bucket, src, dest) => {
+  return storage
+    .bucket(bucket)
+    .upload(src, { destination: dest, metadata: { contentType: 'audio/x-m4a' } })
+    .then(() => {
+      console.log(now(), 'uploaded', key, src, '->', dest);
+    })
+}
+
 module.exports = {
   now,
   format,
@@ -143,4 +154,5 @@ module.exports = {
   toPartialKey,
   downloadFromRadiko,
   downloadFromNhkOnDemand,
+  upload,
 };
