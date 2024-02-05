@@ -5,5 +5,5 @@ services:
     platform: linux/x86_64
     volumes:
       - .:/workspace
-
+    command: /bin/sh -c "while sleep 1000; do :; done"
 
